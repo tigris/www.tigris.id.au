@@ -1,0 +1,53 @@
+= www.tigris.id.au
+
+== Description
+
+My basic site and server configs
+
+== System setup notes
+
+* Setup users / sudo (as root)
+    adduser danial
+    update-alternatives --config editor # choose vi!
+    visudo
+    # change the last ALL in %admin to be NOPASSWD:ALL
+
+* Setup permissions
+    sudo vim /etc/group
+    # add danial to www-data and admin groups, logout etc
+
+=== Website
+
+* Install lighttpd
+    sudo apt-get install lighttpd
+
+* Initial website deploy
+    cd /srv
+    sudo chmod g+w .
+    sudo chgrp admin .
+    git clone git@github.com:tigris/www.tigris.id.au.git
+
+* Symlink the git hook
+    cd /srv/www.tigris.id.au/.git/hooks
+    ln -s ../../config/hooks/post-merge
+
+* Setup the lighttpd config
+    cd /etc/lighttpd/conf-enabled
+    sudo cp /srv/www.tigris.id.au/config/lighttpd/www.tigris.id.au .
+
+=== Mail
+
+* Install postfix
+    sudo apt-get install postfix
+
+* Configs
+    sudo cp /srv/www.tigris.id.au/config/postfix/aliases /etc
+    sudo cp /srv/www.tigris.id.au/config/postfix/main.cf /etc/postfix
+
+=== FTP
+
+* Install vsftpd
+    sudo apt-get install vsftpd
+
+* Configs
+    sudo cp /srv/www/tigris.id.au/config/vsftpd/* /etc
