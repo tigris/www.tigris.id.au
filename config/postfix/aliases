@@ -1,0 +1,8 @@
+postmaster: root
+root: danial
+
+danial: danial.pearce@gmail.com
+zoe: zoe.leadbetter@gmail.com
+
+# fkn spamming cunts
+d0401: /dev/null
