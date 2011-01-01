@@ -30,6 +30,12 @@ restart_daemons() {
     sudo /etc/init.d/postfix reload
     $daemons="$daemons postfix"
   fi
+
+  config=$(git diff $old_tag | grep "^--- a/config/vsftpd")
+  if [ "x$config" != "x" ]; then
+    sudo reload vsftpd
+    $daemons="$daemons vsftpd"
+  fi
 }
 
 print_changelog() {
@@ -41,7 +47,7 @@ $app has been updated with the following changes
 
 The following daemons were reloaded/restarted:
 
-${daemons:-"None restarted."}
+   ${daemons:-"None restarted."}
 
 ====================================================
 
