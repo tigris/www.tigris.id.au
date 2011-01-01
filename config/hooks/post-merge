@@ -22,7 +22,7 @@ restart_daemons() {
   if [ "x$config" != "x" ]; then
     sudo cp config/lighttpd/*.conf /etc/lighttpd/conf-enabled
     sudo service lighthttpd reload
-    $daemons="$daemons lighttpd"
+    daemons="$daemons lighttpd"
   fi
 
   config=$(git diff $old_tag | grep "^--- a/config/postfix")
@@ -31,14 +31,14 @@ restart_daemons() {
     sudo cp config/postfix/main.cf /etc/postfix
     sudo newaliases
     sudo service postfix reload
-    $daemons="$daemons postfix"
+    daemons="$daemons postfix"
   fi
 
   config=$(git diff $old_tag | grep "^--- a/config/vsftpd")
   if [ "x$config" != "x" ]; then
     sudo cp config/vsftp/* /etc
     sudo service vsftpd reload
-    $daemons="$daemons vsftpd"
+    daemons="$daemons vsftpd"
   fi
 }
 
