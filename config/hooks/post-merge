@@ -21,7 +21,7 @@ restart_daemons() {
   config=$(git diff $old_tag | grep "^--- a/config/lighttpd")
   if [ "x$config" != "x" ]; then
     sudo cp config/lighttpd/*.conf /etc/lighttpd/conf-enabled
-    sudo service lighthttpd reload
+    sudo service lighthttpd reload > /dev/null
     daemons="$daemons lighttpd"
   fi
 
@@ -30,7 +30,7 @@ restart_daemons() {
     sudo cp config/postfix/aliases /etc
     sudo cp config/postfix/main.cf /etc/postfix
     sudo newaliases
-    sudo service postfix reload
+    sudo service postfix reload > /dev/null
     daemons="$daemons postfix"
   fi
 
