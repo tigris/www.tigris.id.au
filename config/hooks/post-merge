@@ -20,20 +20,24 @@ update_cron() {
 restart_daemons() {
   config=$(git diff $old_tag | grep "^--- a/config/lighttpd")
   if [ "x$config" != "x" ]; then
-    sudo /etc/init.d/lighttpd reload
+    sudo cp config/lighttpd/*.conf /etc/lighttpd/conf-enabled
+    sudo service lighthttpd reload
     $daemons="$daemons lighttpd"
   fi
 
   config=$(git diff $old_tag | grep "^--- a/config/postfix")
   if [ "x$config" != "x" ]; then
+    sudo cp config/postfix/aliases /etc
+    sudo cp config/postfix/main.cf /etc/postfix
     sudo newaliases
-    sudo /etc/init.d/postfix reload
+    sudo service postfix reload
     $daemons="$daemons postfix"
   fi
 
   config=$(git diff $old_tag | grep "^--- a/config/vsftpd")
   if [ "x$config" != "x" ]; then
-    sudo reload vsftpd
+    sudo cp config/vsftp/* /etc
+    sudo service vsftpd reload
     $daemons="$daemons vsftpd"
   fi
 }
