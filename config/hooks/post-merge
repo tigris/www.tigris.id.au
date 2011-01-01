@@ -7,6 +7,7 @@ mailto="danial"
 new_tag=RELEASE-$(date +%Y%m%dT%H%M%S)
 old_tag=$(git tag -l RELEASE* | sort -r | head -n1)
 old_tag=${old_tag:-"HEAD^"}
+daemons=""
 
 update_cron() {
   config=$(git diff $old_tag | grep "^--- a/config/cron")
@@ -16,10 +17,18 @@ update_cron() {
   fi
 }
 
-restart_lighttpd() {
+restart_daemons() {
   config=$(git diff $old_tag | grep "^--- a/config/lighttpd")
   if [ "x$config" != "x" ]; then
     sudo /etc/init.d/lighttpd reload
+    $daemons="$daemons lighttpd"
+  fi
+
+  config=$(git diff $old_tag | grep "^--- a/config/postfix")
+  if [ "x$config" != "x" ]; then
+    sudo newaliases
+    sudo /etc/init.d/postfix reload
+    $daemons="$daemons postfix"
   fi
 }
 
@@ -30,6 +39,10 @@ Hi,
 
 $app has been updated with the following changes
 
+The following daemons were reloaded/restarted:
+
+${daemons:-"None restarted."}
+
 ====================================================
 
 $(git log --stat --no-color $old_tag..HEAD)
@@ -39,7 +52,7 @@ EOM
 
 cd $home/$app
 update_cron
-restart_lighttpd
+restart_daemons
 
 git tag $new_tag
 print_changelog | mail -s "Restarted $app" $mailto
