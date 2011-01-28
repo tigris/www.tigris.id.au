@@ -17,6 +17,10 @@ update_cron() {
   fi
 }
 
+create_directories() {
+  mkdir -p public/cushy
+}
+
 restart_daemons() {
   config=$(git diff $old_tag | grep "^--- a/config/lighttpd")
   if [ "x$config" != "x" ]; then
@@ -62,6 +66,7 @@ EOM
 
 cd $home/$app
 update_cron
+create_directories
 restart_daemons
 
 git tag $new_tag
