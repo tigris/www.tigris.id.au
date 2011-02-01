@@ -40,7 +40,7 @@ restart_daemons() {
 
   config=$(git diff $old_tag | grep "^--- a/config/vsftpd")
   if [ "x$config" != "x" ]; then
-    sudo cp config/vsftp/* /etc
+    sudo cp config/vsftpd/* /etc
     sudo service vsftpd reload
     daemons="$daemons vsftpd"
   fi
