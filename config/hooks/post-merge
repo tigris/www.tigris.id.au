@@ -10,11 +10,8 @@ old_tag=${old_tag:-"HEAD^"}
 daemons=""
 
 update_cron() {
-  config=$(git diff $old_tag | grep "^--- a/config/cron")
-  if [ "x$config" != "x" ]; then
-    sudo cp config/cron/* /etc/cron.d
-    sudo chown root.root /etc/cron.d/*
-  fi
+  sudo cp config/cron/* /etc/cron.d
+  sudo chown root.root /etc/cron.d/*
 }
 
 create_directories() {
