@@ -2,7 +2,7 @@
 
 function pull() {
   git reset --hard -q > /dev/null
-  log=$(git pull -q 2>&1 > /dev/null | grep -v "\(Connection closed by remote host\|The remote end hung up unexpectedly\|Connection timed out\|Connection refused\)")
+  log=$(git pull -q 2>&1 > /dev/null | grep -v "\(Connection closed by remote host\|The remote end hung up unexpectedly\|Connection timed out\|Connection refused\|Warning: Permanently added\)")
   if [ "x$log" != "x" ]; then
      echo "failed to pull changes: $! $log" 1>&2
      exit 1
