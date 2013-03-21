@@ -44,6 +44,10 @@ My basic site and server configs
     sudo cp /srv/www.tigris.id.au/config/postfix/aliases /etc
     sudo cp /srv/www.tigris.id.au/config/postfix/main.cf /etc/postfix
 
+* So that gmail can authenticate to my mail server properly, need to edit /etc/defaults/saslauthd
+    Obviously set it to start by default.
+    Change OPTIONS to "-c -m /var/spool/postfix/var/run/saslauthd"
+
 === FTP
 
 * Install vsftpd
