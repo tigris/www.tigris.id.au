@@ -1,6 +1,6 @@
 #!/bin/bash
 
-home="/srv"
+home="/home/danial"
 app="www.tigris.id.au"
 mailto="danial"
 

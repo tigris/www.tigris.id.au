@@ -22,18 +22,18 @@ My basic site and server configs
     sudo apt-get install lighttpd
 
 * Initial website deploy
-    cd /srv
+    cd /home/danial
     sudo chmod g+w .
     sudo chgrp admin .
     git clone git@github.com:tigris/www.tigris.id.au.git
 
 * Symlink the git hook
-    cd /srv/www.tigris.id.au/.git/hooks
+    cd /home/danial/www.tigris.id.au/.git/hooks
     ln -s ../../config/hooks/post-merge
 
 * Setup the lighttpd config
     cd /etc/lighttpd/conf-enabled
-    sudo cp /srv/www.tigris.id.au/config/lighttpd/www.tigris.id.au .
+    sudo cp /home/danial/www.tigris.id.au/config/lighttpd/www.tigris.id.au .
 
 === Mail
 
@@ -41,8 +41,8 @@ My basic site and server configs
     sudo apt-get install postfix
 
 * Configs
-    sudo cp /srv/www.tigris.id.au/config/postfix/aliases /etc
-    sudo cp /srv/www.tigris.id.au/config/postfix/main.cf /etc/postfix
+    sudo cp /home/danial/www.tigris.id.au/config/postfix/aliases /etc
+    sudo cp /home/danial/www.tigris.id.au/config/postfix/main.cf /etc/postfix
 
 * So that gmail can authenticate to my mail server properly, need to edit /etc/defaults/saslauthd
     Obviously set it to start by default.
@@ -54,4 +54,4 @@ My basic site and server configs
     sudo apt-get install vsftpd
 
 * Configs
-    sudo cp /srv/www/tigris.id.au/config/vsftpd/* /etc
+    sudo cp /home/danial/www/tigris.id.au/config/vsftpd/* /etc
