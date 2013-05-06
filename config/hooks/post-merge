@@ -28,8 +28,10 @@ restart_daemons() {
 
   config=$(git diff $old_tag | grep "^--- a/config/postfix")
   if [ "x$config" != "x" ]; then
+    sudo mkdir -p /etc/postfix/sasl
     sudo cp config/postfix/aliases /etc
     sudo cp config/postfix/main.cf /etc/postfix
+    sudo cp config/postfix/sasl/smtpd.conf /etc/postfix/sasl
     sudo newaliases
     sudo service postfix reload > /dev/null
     daemons="$daemons postfix"
