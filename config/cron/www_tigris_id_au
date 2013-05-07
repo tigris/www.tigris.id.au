@@ -1,5 +1,5 @@
 MAILTO="danial"
 */5  * * * * danial cd /home/danial/www.tigris.id.au && ./bin/tigris-git pull
 0    * * * * root   /usr/sbin/ntpdate ntp.ubuntu.com > /dev/null
-*/10 * * * * danial cd /home/danial/www.tigris.id.au && ./bin/torrentday-fix-rss 'http://www.torrentday.com/get_rss.php?feed=direct&user=tigris666&cat=7&passkey=c1fb625ab2277779aedb1dc451bf6d9e'
-*/10 * * * * danial cd /home/danial/www.tigris.id.au && ./bin/torrentday-fix-rss 'http://www.torrentday.com/get_rss.php?feed=direct&user=tigris666&cat=2&passkey=c1fb625ab2277779aedb1dc451bf6d9e'
+*/10 * * * * danial cd /home/danial/www.tigris.id.au && ./bin/torrentday-rss-fixer 'http://www.torrentday.com/get_rss.php?feed=direct&user=tigris666&cat=7&passkey=c1fb625ab2277779aedb1dc451bf6d9e'
+*/10 * * * * danial cd /home/danial/www.tigris.id.au && ./bin/torrentday-rss-fixer 'http://www.torrentday.com/get_rss.php?feed=direct&user=tigris666&cat=2&passkey=c1fb625ab2277779aedb1dc451bf6d9e'
