@@ -3,3 +3,5 @@
 ._*
 public/cushy
 public/data
+public/rss/*.rss
+gems
