@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'nokogiri'
+require 'uri'
+require 'digest/md5'
+require 'time'
+
+url  = URI.parse(ARGV[0])
+md5  = Digest::MD5.hexdigest(url.to_s)
+tmp  = "/tmp/#{md5}"
+path = "public/#{md5}.rss"
+
+`wget --quiet --output-document #{tmp}.gz '#{url}'`
+`gunzip --stdout #{tmp}.gz > #{tmp} && rm #{tmp}.gz`
+
+rss = Nokogiri.XML(File.read tmp)
+rss.xpath('./rss/channel/item').each do |item|
+  title       = item.xpath('./title').first
+  link        = item.xpath('./link').first
+  description = item.xpath('./description').first
+
+  guid = Nokogiri::XML::Node.new('guid', rss)
+  guid['isPermaLink'] = 'true'
+  guid.content = link.content
+
+  category = Nokogiri::XML::Node.new('category', rss)
+  category.content = 'Torrentday - ' + description.content.match(/Category: (.+) Size:/)[1]
+
+  uploaded = description.content.match(/Uploaded: (\d\d:\d\d \d\d-\d\d-\d\d\d\d)/)[1]
+  pubDate  = Nokogiri::XML::Node.new('pubDate', rss)
+  pubDate.content = Time.parse(uploaded).strftime('%F %T')
+
+  description.content = title.content
+
+  link.add_next_sibling(guid)
+  link.add_next_sibling(category)
+  link.add_next_sibling(pubDate)
+end
+
+File.open(tmp, 'w'){|f| f.puts rss.to_s }
+`mv #{tmp} #{path}`
