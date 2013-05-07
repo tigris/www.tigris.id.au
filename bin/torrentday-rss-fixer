@@ -9,7 +9,7 @@ require 'time'
 url  = URI.parse(ARGV[0])
 md5  = Digest::MD5.hexdigest(url.to_s)
 tmp  = "/tmp/#{md5}"
-path = "public/#{md5}.rss"
+path = "public/rss/#{md5}.rss"
 
 `wget --quiet --output-document #{tmp}.gz '#{url}'`
 `gunzip --stdout #{tmp}.gz > #{tmp} && rm #{tmp}.gz`
