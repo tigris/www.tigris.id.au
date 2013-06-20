@@ -17,8 +17,16 @@ body {
 }
 
 a  { color: #fff; }
-h1 { margin: 10px; font-size: 22px; font-weight: bold; }
-h2 { margin: 10px; font-size: 15px; font-weight: bold; }
+h1 { margin: 10px; font-size: 24px; font-weight: bold; }
+h2 { margin: 10px; font-size: 22px; font-weight: bold; }
 p  { margin: 10px; }
-ul { margin: 10px; padding: 0px; }
+ul { margin: 0 10px; padding: 0px; list-style: none; }
 li { margin: 2px 10px; }
+
+#heading {
+  margin-bottom: 20px;
+}
+
+#links h2 {
+  margin-bottom: 0;
+}
