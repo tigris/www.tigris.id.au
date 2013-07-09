@@ -11,8 +11,8 @@ md5  = Digest::MD5.hexdigest(url.to_s)
 tmp  = "/tmp/#{md5}"
 path = "public/rss/#{md5}.rss"
 
-system(%Q(wget --quiet --output-document #{tmp}.gz '#{url}'))   || exit(1)
-system(%Q(gunzip --stdout #{tmp}.gz > #{tmp} && rm #{tmp}.gz`)) || exit(1)
+system(%Q(wget --quiet --output-document #{tmp}.gz '#{url}'))  || exit(1)
+system(%Q(gunzip --stdout #{tmp}.gz > #{tmp} && rm #{tmp}.gz)) || exit(1)
 
 rss = Nokogiri.XML(File.read tmp)
 rss.xpath('./rss/channel/item').each do |item|
