@@ -1,5 +1,6 @@
 postmaster: root
 root: danial
+cron: danial
 
 danial: danial.pearce@gmail.com
 zoe: zoe.leadbetter@gmail.com
