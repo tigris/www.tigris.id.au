@@ -1,0 +1,6 @@
+git pull -q origin $1 2>&1 \
+  | grep -v "Warning: Permanently added" \
+  | grep -v "Connection closed by remote host" \
+  | grep -v "The remote end hung up unexpectedly" \
+  | grep -v "ERROR: GitHub is offline for maintenance" \
+;
