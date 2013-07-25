@@ -13,13 +13,13 @@ My basic site and server configs
     # change the last ALL in %admin to be NOPASSWD:ALL
 
 * Setup permissions
-    sudo vim /etc/group
-    # add danial to www-data and admin groups, logout etc
+    sudo usermod danial -a -G admin
+    sudo usermod danial -a -G www-data
 
 === Website
 
-* Install lighttpd
-    sudo apt-get install lighttpd
+* Install nginx
+    sudo apt-get install nginx
 
 * Initial website deploy
     cd /home/danial
@@ -31,21 +31,30 @@ My basic site and server configs
     cd /home/danial/www.tigris.id.au/.git/hooks
     ln -s ../../config/hooks/post-merge
 
-* Setup the lighttpd config
+* Setup the nginx config
     cd /etc/lighttpd/conf-enabled
-    sudo cp /home/danial/www.tigris.id.au/config/lighttpd/www.tigris.id.au .
+    sudo cp /home/danial/www.tigris.id.au/config/nginx/www.tigris.id.au .
 
 === Mail
 
-* Install postfix
-    sudo apt-get install postfix sasl2-bin
+* Install postfix with SPF functionality
+    sudo apt-get install postfix sasl2-bin postfix-policyd-spf-python
     sudo usermod postfix -a -G sasl
+
+* Setup dovecot (pop3) since we want the ability to test SPF records and spam policies properly, and blatantly forwarding all @tigris email to gmail without changing the Sender (possible with SRS) results in screwing all those spam policies up.
+    sudo apt-get install dovecot-pop3d
+    sudo usermod danial -a -G mail
+
+* Edit /etc/postfix/master.cf add to bottom of file:
+policy-spf  unix  -       n       n       -       -       spawn
+     user=nobody argv=/usr/bin/policyd-spf
 
 * Configs
     sudo mkdir -p /etc/postfix/sasl
     sudo cp /home/danial/www.tigris.id.au/config/postfix/aliases /etc
     sudo cp /home/danial/www.tigris.id.au/config/postfix/main.cf /etc/postfix
     sudo cp /home/danial/www.tigris.id.au/config/postfix/sasl/smtpd.conf /etc/postfix/sasl
+    sudo perl -pi -e 's/disable_plaintext_auth = yes/disable_plaintext_auth = no/' /etc/dovecot/conf.d/10-auth.conf
 
 * So that gmail can authenticate to my mail server properly, need to edit /etc/defaults/saslauthd
     Obviously set it to start by default.
