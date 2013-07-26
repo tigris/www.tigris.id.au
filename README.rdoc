@@ -13,8 +13,8 @@ My basic site and server configs
     # change the last ALL in %admin to be NOPASSWD:ALL
 
 * Setup permissions
-    sudo usermod danial -a -G admin
-    sudo usermod danial -a -G www-data
+    sudo adduser danial admin
+    sudo adduser danial www-data
 
 === Website
 
@@ -39,15 +39,66 @@ My basic site and server configs
 
 * Install postfix with SPF functionality
     sudo apt-get install postfix sasl2-bin postfix-policyd-spf-python
-    sudo usermod postfix -a -G sasl
+    sudo adduser postfix sasl
 
 * Setup dovecot (pop3) since we want the ability to test SPF records and spam policies properly, and blatantly forwarding all @tigris email to gmail without changing the Sender (possible with SRS) results in screwing all those spam policies up.
     sudo apt-get install dovecot-pop3d
-    sudo usermod danial -a -G mail
+    sudo adduser danial mail
 
 * Edit /etc/postfix/master.cf add to bottom of file:
 policy-spf  unix  -       n       n       -       -       spawn
      user=nobody argv=/usr/bin/policyd-spf
+
+* DKIM - so i'm not a spammer
+    sudo apt-get install opendkim opendkim-tools
+    sudo mkdir /etc/mail
+    cd /etc/mail
+    sudo opendkim-genkey -t -s mail -d '*'
+    sudo perl -pi -e 's/#SOCKET="inet:8891\@localhost"/SOCKET="inet:8891\@localhost"/' /etc/default/opendkim
+    sudo cp /home/danial/www.tigris.id.au/config/dkim/opendkim.conf /etc/opendkim.conf
+    sudo service opendkim restart
+
+* Block those spamming fuckers
+    sudo apt-get install amavisd-new spamassassin clamav-daemon pyzor razor unrar-free arj unarj zip unzip cabextract zoo lzop rpm2cpio p7zip ripole arj nomarch
+    sudo adduser clamav amavis
+    sudo adduser amavis clamav
+    sudo perl -pi -e 's/CRON=0/CRON=1/' /etc/default/spamassassin
+    sudo perl -pi -e 's/ENABLED=0/ENABLED=1/' /etc/default/spamassassin
+    sudo /etc/init.d/spamassassin start
+    sudo perl -pi -e 's/#\@bypass/@\bypass/' /etc/amavis/conf.d/15-content_filter_mode
+    sudo perl -pi -e 's/#   \\%/   \\%/' /etc/amavis/conf.d/15-content_filter_mode
+    sudo /etc/init.d/amavis restart
+
+    Add to master.cf
+mtp-amavis     unix    -       -       -       -       2       smtp
+        -o smtp_data_done_timeout=1200
+        -o smtp_send_xforward_command=yes
+        -o disable_dns_lookups=yes
+        -o max_use=20
+
+127.0.0.1:10025 inet    n       -       -       -       -       smtpd
+        -o content_filter=
+        -o local_recipient_maps=
+        -o relay_recipient_maps=
+        -o smtpd_restriction_classes=
+        -o smtpd_delay_reject=no
+        -o smtpd_client_restrictions=permit_mynetworks,reject
+        -o smtpd_helo_restrictions=
+        -o smtpd_sender_restrictions=
+        -o smtpd_recipient_restrictions=permit_mynetworks,reject
+        -o smtpd_data_restrictions=reject_unauth_pipelining
+        -o smtpd_end_of_data_restrictions=
+        -o mynetworks=127.0.0.0/8
+        -o smtpd_error_sleep_time=0
+        -o smtpd_soft_error_limit=1001
+        -o smtpd_hard_error_limit=1000
+        -o smtpd_client_connection_count_limit=0
+        -o smtpd_client_connection_rate_limit=0
+        -o receive_override_options=no_header_body_checks,no_unknown_recipient_checks
+
+    Add to master.cf below the pickup transport service
+        -o content_filter=
+        -o receive_override_options=no_header_body_checks
 
 * Configs
     sudo mkdir -p /etc/postfix/sasl

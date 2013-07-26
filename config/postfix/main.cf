@@ -31,3 +31,10 @@ broken_sasl_auth_clients = yes
 smtpd_relay_restrictions = permit_sasl_authenticated,permit_mynetworks,reject_unauth_destination,check_policy_service unix:private/policy-spf
 
 policy-spf_time_limit = 3600s
+
+milter_default_action = accept
+milter_protocol = 2
+smtpd_milters = inet:localhost:8891
+non_smtpd_milters = inet:localhost:8891
+
+content_filter = smtp-amavis:[127.0.0.1]:10024
