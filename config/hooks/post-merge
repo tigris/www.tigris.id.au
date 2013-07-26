@@ -47,6 +47,13 @@ restart_daemons() {
     sudo service vsftpd reload
     daemons="$daemons vsftpd"
   fi
+
+  config=$(git diff $old_tag | grep "^--- a/config/dkim")
+  if [ "x$config" != "x" ]; then
+    sudo cp config/dkim/* /etc
+    sudo service opendkim restart
+    daemons="$daemons opendkim"
+  fi
 }
 
 print_changelog() {
