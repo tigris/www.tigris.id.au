@@ -3,3 +3,4 @@ MAILTO="danial"
 0    * * * * root /usr/sbin/ntpdate ntp.ubuntu.com > /dev/null
 */10 * * * * root su -lc 'cd /home/danial/www.tigris.id.au && ./bin/torrentday-rss-fixer "http://www.torrentday.com/get_rss.php?feed=direct&user=tigris666&cat=7&passkey=c1fb625ab2277779aedb1dc451bf6d9e"' danial
 */10 * * * * root su -lc 'cd /home/danial/www.tigris.id.au && ./bin/torrentday-rss-fixer "http://www.torrentday.com/get_rss.php?feed=direct&user=tigris666&cat=2&passkey=c1fb625ab2277779aedb1dc451bf6d9e"' danial
+*/2  * * * * danial /bin/echo "Ignore this gmail fetcher hack." | /usr/bin/mail -s "[IGNORE] Gmail hack" danial
