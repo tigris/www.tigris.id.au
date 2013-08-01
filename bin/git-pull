@@ -3,4 +3,8 @@ git pull -q origin $1 2>&1 \
   | grep -v "Connection closed by remote host" \
   | grep -v "The remote end hung up unexpectedly" \
   | grep -v "ERROR: GitHub is offline for maintenance" \
+  | grep -v "Could not read from remote repository." \
+  | grep -v "Please make sure you have the correct access rights" \
+  | grep -v "and the repository exists." \
+  | grep -v "^$" \
 ;
