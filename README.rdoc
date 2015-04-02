@@ -50,17 +50,19 @@ policy-spf  unix  -       n       n       -       -       spawn
      user=nobody argv=/usr/bin/policyd-spf
 
 * DKIM - so i'm not a spammer
-    sudo apt-get install opendkim opendkim-tools dk-filter
+    sudo apt-get install opendkim opendkim-tools # dk-filter
     sudo mkdir /etc/mail
     cd /etc/mail
     sudo opendkim-genkey -t -s mail -d '*'
-    sudo mv mail.private dkim.key
+    sudo chmod 700 mail.private
+    sudo mv mail.private opendkim.key
+    # sudo cp opendkim.key dk-filter.key
     sudo perl -pi -e 's/#SOCKET="inet:8891\@localhost"/SOCKET="inet:8891\@localhost"/' /etc/default/opendkim
-    sudo perl -pi -e 's/#SOCKET="inet:12345\@localhost"/SOCKET="inet:8892\@localhost"/' /etc/default/dk-filter
-    sudo perl -pi -e 's/#DAEMON_OPTS="\$DAEMON_OPTS -d example.com -s \/etc\/mail\/domainkey.key -S 2007"/DAEMON_OPTS="\$DAEMON_OPTS -d tigris.id.au -s \/etc\/mail\/dkim.key -S mail"/' /etc/default/dk-filter
+    # sudo perl -pi -e 's/#SOCKET="inet:12345\@localhost"/SOCKET="inet:8892\@localhost"/' /etc/default/dk-filter
+    # sudo perl -pi -e 's/#DAEMON_OPTS="\$DAEMON_OPTS -d example.com -s \/etc\/mail\/domainkey.key -S 2007"/DAEMON_OPTS="\$DAEMON_OPTS -d tigris.id.au -s \/etc\/mail\/dk-filter.key -S mail"/' /etc/default/dk-filter
     sudo cp /home/danial/www.tigris.id.au/config/dkim/opendkim.conf /etc/opendkim.conf
     sudo service opendkim restart
-    sudo service dk-filter restart
+    # sudo service dk-filter restart
 
 * Block those spamming fuckers
     sudo apt-get install amavisd-new spamassassin clamav-daemon pyzor razor unrar-free arj unarj zip unzip cabextract zoo lzop rpm2cpio p7zip ripole arj nomarch
