@@ -75,6 +75,14 @@ policy-spf  unix  -       n       n       -       -       spawn
     sudo perl -pi -e 's/#   \\%/   \\%/' /etc/amavis/conf.d/15-content_filter_mode
     sudo /etc/init.d/amavis restart
 
+    You will most definitely want to edit /etc/amavis/conf.d/50-user and remove / comment out references to
+    # $sa_kill_level_deflt = 7;
+    # $sa_dsn_cutoff_level = 10;
+
+    Also worth setting
+    # $virus_quarantine_to = undef;
+    # $spam_quarantine_to = undef;
+
     Add to master.cf
 mtp-amavis     unix    -       -       -       -       2       smtp
         -o smtp_data_done_timeout=1200
