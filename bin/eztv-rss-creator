@@ -1,0 +1,55 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'nokogiri'
+require 'digest/md5'
+require 'open-uri/cached'
+require 'time'
+
+url = 'https://eztv.ch/'
+OpenURI::Cache.invalidate(url, Time.now - 300)
+
+md5  = Digest::MD5.hexdigest(url.to_s)
+tmp  = "/tmp/#{md5}"
+path = "public/rss/#{md5}.rss"
+
+def parse_time string
+  now = Time.now
+  if days = string.match(/(\d+)d/)
+    now -= days[1].to_i * 86400
+  end
+  if hours = string.match(/(\d+)h/)
+    now -= hours[1].to_i * 3600
+  end
+  if minutes = string.match(/(\d+)m/)
+    now -= minutes[1].to_i * 60
+  else
+    now -= now.min * 60
+  end
+  if seconds = string.match(/(\d+)s/)
+    now -= seconds[1].to_i
+  else
+    now -= now.sec
+  end
+  now.strftime('%F %T')
+end
+
+builder = Nokogiri::XML::Builder.new do
+  rss(version: '2.0') do
+    channel do
+      Nokogiri::HTML(open(url, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)).css('tr.forum_header_border').each do |x|
+        item do
+          title x.css('a.epinfo').first.text
+          link x.css('.forum_thread_post')[2].css('a')[2][:href]
+          guid x.css('.forum_thread_post')[2].css('a')[2][:href], permalink: true
+          description x.css('a.epinfo').first[:title]
+          pubDate parse_time(x.css('.forum_thread_post')[3].text)
+          category 'TV'
+        end
+      end
+    end
+  end
+end
+
+File.open(tmp, 'w'){|f| f.puts builder.to_xml }
+system(%Q{mv #{tmp} #{path}})

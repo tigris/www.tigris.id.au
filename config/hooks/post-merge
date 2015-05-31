@@ -19,7 +19,7 @@ create_directories() {
 }
 
 bundle_install() {
-  bundle install --path gems > /dev/null
+  bundle install --path gems --without development > /dev/null
 }
 
 restart_daemons() {
