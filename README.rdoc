@@ -14,6 +14,7 @@ My basic site and server configs
 
 * Setup permissions
     sudo adduser danial admin
+    sudo adduser danial adm
     sudo adduser danial www-data
 
 === Website
@@ -32,8 +33,9 @@ My basic site and server configs
     ln -s ../../config/hooks/post-merge
 
 * Setup the nginx config
-    cd /etc/lighttpd/conf-enabled
-    sudo cp /home/danial/www.tigris.id.au/config/nginx/www.tigris.id.au .
+    cd /etc/nginx/sites-enabled
+    sudo rm -f default
+    sudo cp /home/danial/www.tigris.id.au/config/nginx/www.tigris.id.au.conf .
 
 === Mail
 
@@ -65,7 +67,7 @@ policy-spf  unix  -       n       n       -       -       spawn
     # sudo service dk-filter restart
 
 * Block those spamming fuckers
-    sudo apt-get install amavisd-new spamassassin clamav-daemon pyzor razor unrar-free arj unarj zip unzip cabextract zoo lzop rpm2cpio p7zip ripole arj nomarch
+    sudo apt-get install amavisd-new spamassassin clamav-daemon pyzor razor unrar-free zip unzip cabextract zoo lzop rpm2cpio p7zip ripole nomarch
     sudo adduser clamav amavis
     sudo adduser amavis clamav
     sudo perl -pi -e 's/CRON=0/CRON=1/' /etc/default/spamassassin
@@ -84,7 +86,7 @@ policy-spf  unix  -       n       n       -       -       spawn
     # $spam_quarantine_to = undef;
 
     Add to master.cf
-mtp-amavis     unix    -       -       -       -       2       smtp
+smtp-amavis     unix    -       -       -       -       2       smtp
         -o smtp_data_done_timeout=1200
         -o smtp_send_xforward_command=yes
         -o disable_dns_lookups=yes
@@ -121,7 +123,7 @@ mtp-amavis     unix    -       -       -       -       2       smtp
     sudo cp /home/danial/www.tigris.id.au/config/postfix/sasl/smtpd.conf /etc/postfix/sasl
     sudo perl -pi -e 's/disable_plaintext_auth = yes/disable_plaintext_auth = no/' /etc/dovecot/conf.d/10-auth.conf
 
-* So that gmail can authenticate to my mail server properly, need to edit /etc/defaults/saslauthd
+* So that gmail can authenticate to my mail server properly, need to edit /etc/default/saslauthd
     Obviously set it to start by default.
     Change OPTIONS to "-c -m /var/spool/postfix/var/run/saslauthd"
 
@@ -131,4 +133,4 @@ mtp-amavis     unix    -       -       -       -       2       smtp
     sudo apt-get install vsftpd
 
 * Configs
-    sudo cp /home/danial/www/tigris.id.au/config/vsftpd/* /etc
+    sudo cp /home/danial/www.tigris.id.au/config/vsftpd/* /etc
