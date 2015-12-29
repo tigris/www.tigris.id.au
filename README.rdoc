@@ -65,7 +65,7 @@ My basic site and server configs
 === Mail
 
 * Install postfix with SPF functionality
-    sudo apt-get install -y postfix sasl2-bin postfix-policyd-spf-python
+    sudo apt-get install -y postfix sasl2-bin postfix-policyd-spf-python mailutils
     sudo adduser postfix sasl
 
 * Setup dovecot (pop3) since we want the ability to test SPF records and spam policies properly, and blatantly forwarding all @tigris email to gmail without changing the Sender (possible with SRS) results in screwing all those spam policies up.
@@ -77,11 +77,10 @@ My basic site and server configs
     sudo mkdir /etc/mail
     cd /etc/mail
     sudo opendkim-genkey -t -s mail -d '*'
-    sudo mv mail.private opendkim.key
     sudo perl -pi -e 's/#SOCKET="inet:12345\@localhost"/SOCKET="inet:8891\@localhost"/' /etc/default/opendkim
     sudo cp /home/danial/www.tigris.id.au/config/dkim/opendkim.conf /etc/opendkim.conf
     sudo chmod 600 /etc/opendkim.conf
-    sudo chown opendkim /etc/mail/opendkim.key
+    sudo chown opendkim /etc/mail/mail.*
     sudo service opendkim restart
 
 * Block those spamming fuckers
