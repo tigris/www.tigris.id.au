@@ -17,22 +17,47 @@ My basic site and server configs
     sudo adduser danial adm
     sudo adduser danial www-data
 
+=== General setup
+
+    echo "Australia/Melbourne" | sudo tee /etc/timezone >/dev/null
+    sudo dpkg-reconfigure --frontend noninteractive tzdata
+    sudo -E apt-get -y install build-essential pkg-config git
+
+    # install required packages (assumes Ubuntu 14.04 base AMI)
+    sudo -E apt-get install -y python-pip
+    sudo pip install awscli
+    sudo pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz
+
+    # we don't always already have wget installed
+    sudo -E apt-get install -y wget
+
+    # we use jq for various things
+    sudo -E apt-get install -y jq
+
+    # we need teh rubies and dependencies for our gems
+    sudo -E apt-get -y install zlib1g-dev libssl-dev libreadline6-dev libyaml-dev libffi-dev libxml2-dev libxslt1-dev
+    cd /tmp
+    wget http://cache.ruby-lang.org/pub/ruby/2.3/ruby-2.3.0.tar.gz
+    tar -xvzf ruby-2.3.0.tar.gz
+    cd ruby-2.3.0/
+    ./configure --prefix=/usr/local
+    make
+    sudo make install
+    sudo gem install bundler
+
+    # setup some base gems a lot of things use
+    bundle config --global jobs 2/number_of_cores
+    bundle config --global build.nokogiri --use-system-libraries --with-xml2-include=/usr/include/libxml2
+
 === Website
 
-* Install nginx
-    sudo apt-get install nginx
-
-* Initial website deploy
+    sudo apt-get install -y nginx-full
     cd /home/danial
     sudo chmod g+w .
     sudo chgrp admin .
     git clone git@github.com:tigris/www.tigris.id.au.git
-
-* Symlink the git hook
     cd /home/danial/www.tigris.id.au/.git/hooks
     ln -s ../../config/hooks/post-merge
-
-* Setup the nginx config
     cd /etc/nginx/sites-enabled
     sudo rm -f default
     sudo cp /home/danial/www.tigris.id.au/config/nginx/www.tigris.id.au.conf .
@@ -40,86 +65,48 @@ My basic site and server configs
 === Mail
 
 * Install postfix with SPF functionality
-    sudo apt-get install postfix sasl2-bin postfix-policyd-spf-python
+    sudo apt-get install -y postfix sasl2-bin postfix-policyd-spf-python
     sudo adduser postfix sasl
 
 * Setup dovecot (pop3) since we want the ability to test SPF records and spam policies properly, and blatantly forwarding all @tigris email to gmail without changing the Sender (possible with SRS) results in screwing all those spam policies up.
-    sudo apt-get install dovecot-pop3d
+    sudo apt-get install -y dovecot-pop3d
     sudo adduser danial mail
 
-* Edit /etc/postfix/master.cf add to bottom of file:
-policy-spf  unix  -       n       n       -       -       spawn
-     user=nobody argv=/usr/bin/policyd-spf
-
 * DKIM - so i'm not a spammer
-    sudo apt-get install opendkim opendkim-tools # dk-filter
+    sudo apt-get install -y opendkim opendkim-tools
     sudo mkdir /etc/mail
     cd /etc/mail
     sudo opendkim-genkey -t -s mail -d '*'
-    sudo chmod 700 mail.private
     sudo mv mail.private opendkim.key
-    # sudo cp opendkim.key dk-filter.key
-    sudo perl -pi -e 's/#SOCKET="inet:8891\@localhost"/SOCKET="inet:8891\@localhost"/' /etc/default/opendkim
-    # sudo perl -pi -e 's/#SOCKET="inet:12345\@localhost"/SOCKET="inet:8892\@localhost"/' /etc/default/dk-filter
-    # sudo perl -pi -e 's/#DAEMON_OPTS="\$DAEMON_OPTS -d example.com -s \/etc\/mail\/domainkey.key -S 2007"/DAEMON_OPTS="\$DAEMON_OPTS -d tigris.id.au -s \/etc\/mail\/dk-filter.key -S mail"/' /etc/default/dk-filter
+    sudo perl -pi -e 's/#SOCKET="inet:12345\@localhost"/SOCKET="inet:8891\@localhost"/' /etc/default/opendkim
     sudo cp /home/danial/www.tigris.id.au/config/dkim/opendkim.conf /etc/opendkim.conf
+    sudo chmod 600 /etc/opendkim.conf
+    sudo chown opendkim /etc/mail/opendkim.key
     sudo service opendkim restart
-    # sudo service dk-filter restart
 
 * Block those spamming fuckers
-    sudo apt-get install amavisd-new spamassassin clamav-daemon pyzor razor unrar-free zip unzip cabextract zoo lzop rpm2cpio p7zip ripole nomarch
+    sudo apt-get install -y fail2ban amavisd-new spamassassin clamav-daemon pyzor razor unrar-free zip unzip cabextract zoo lzop rpm2cpio p7zip ripole nomarch
     sudo adduser clamav amavis
     sudo adduser amavis clamav
     sudo perl -pi -e 's/CRON=0/CRON=1/' /etc/default/spamassassin
     sudo perl -pi -e 's/ENABLED=0/ENABLED=1/' /etc/default/spamassassin
     sudo /etc/init.d/spamassassin start
-    sudo perl -pi -e 's/#\@bypass/@\bypass/' /etc/amavis/conf.d/15-content_filter_mode
+    sudo perl -pi -e 's/#\@bypass/\@bypass/' /etc/amavis/conf.d/15-content_filter_mode
     sudo perl -pi -e 's/#   \\%/   \\%/' /etc/amavis/conf.d/15-content_filter_mode
     sudo /etc/init.d/amavis restart
 
-    You will most definitely want to edit /etc/amavis/conf.d/50-user and remove / comment out references to
-    # $sa_kill_level_deflt = 7;
-    # $sa_dsn_cutoff_level = 10;
+    You will most definitely want to edit /etc/amavis/conf.d/20-debian-defaults and remove / comment out references to
+    # $sa_kill_level_deflt = ...
+    # $sa_dsn_cutoff_level = ...
 
-    Also worth setting
-    # $virus_quarantine_to = undef;
-    # $spam_quarantine_to = undef;
-
-    Add to master.cf
-smtp-amavis     unix    -       -       -       -       2       smtp
-        -o smtp_data_done_timeout=1200
-        -o smtp_send_xforward_command=yes
-        -o disable_dns_lookups=yes
-        -o max_use=20
-
-127.0.0.1:10025 inet    n       -       -       -       -       smtpd
-        -o content_filter=
-        -o local_recipient_maps=
-        -o relay_recipient_maps=
-        -o smtpd_restriction_classes=
-        -o smtpd_delay_reject=no
-        -o smtpd_client_restrictions=permit_mynetworks,reject
-        -o smtpd_helo_restrictions=
-        -o smtpd_sender_restrictions=
-        -o smtpd_recipient_restrictions=permit_mynetworks,reject
-        -o smtpd_data_restrictions=reject_unauth_pipelining
-        -o smtpd_end_of_data_restrictions=
-        -o mynetworks=127.0.0.0/8
-        -o smtpd_error_sleep_time=0
-        -o smtpd_soft_error_limit=1001
-        -o smtpd_hard_error_limit=1000
-        -o smtpd_client_connection_count_limit=0
-        -o smtpd_client_connection_rate_limit=0
-        -o receive_override_options=no_header_body_checks,no_unknown_recipient_checks
-
-    Add to master.cf below the pickup transport service
-        -o content_filter=
-        -o receive_override_options=no_header_body_checks
+    Also worth setting these in /etc/amavis/conf.d/50-user
+       $virus_quarantine_to = undef;
+       $spam_quarantine_to = undef;
 
 * Configs
     sudo mkdir -p /etc/postfix/sasl
     sudo cp /home/danial/www.tigris.id.au/config/postfix/aliases /etc
-    sudo cp /home/danial/www.tigris.id.au/config/postfix/main.cf /etc/postfix
+    sudo cp /home/danial/www.tigris.id.au/config/postfix/{main,master}.cf /etc/postfix
     sudo cp /home/danial/www.tigris.id.au/config/postfix/sasl/smtpd.conf /etc/postfix/sasl
     sudo perl -pi -e 's/disable_plaintext_auth = yes/disable_plaintext_auth = no/' /etc/dovecot/conf.d/10-auth.conf
 
@@ -129,8 +116,14 @@ smtp-amavis     unix    -       -       -       -       2       smtp
 
 === FTP
 
-* Install vsftpd
-    sudo apt-get install vsftpd
-
-* Configs
+    sudo apt-get install -y vsftpd
     sudo cp /home/danial/www.tigris.id.au/config/vsftpd/* /etc
+    sudo service vsftpd restart
+
+=== Monitoring
+
+    sudo apt-get install -y monit
+    sudo cp /home/danial/www.tigris.id.au/config/monit/monitrc /etc/monit/monitrc
+    sudo cp /home/danial/www.tigris.id.au/config/monit/*.conf /etc/monit/conf.d/
+    sudo cp /home/danial/www.tigris.id.au/config/nginx/monit.conf /etc/nginx/sites-enabled/monit.conf
+    sudo service nginx restart
