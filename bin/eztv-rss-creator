@@ -19,7 +19,8 @@ builder = Nokogiri::XML::Builder.new do
       Nokogiri::HTML(open(url, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)).css('tr.forum_header_border').each do |x|
         item do
           title x.css('a.epinfo').first.text
-          href = x.css('.forum_thread_post')[2].css('a')[2][:href] rescue x.css('.forum_thread_post')[2].css('a')[1][:href]
+          posts = x.css('.forum_thread_post')[2].css('a')
+          href  = (posts[2] || posts[1] || posts[0])[:href]
           link href
           guid href, permalink: true
           description x.css('a.epinfo').first[:title]
