@@ -5,7 +5,6 @@ require 'nokogiri'
 require 'digest/md5'
 require 'open-uri/cached'
 require 'time'
-require 'pry'
 
 url = 'https://eztv.ch/'
 OpenURI::Cache.invalidate(url, Time.now - 300)
