@@ -20,7 +20,7 @@ builder = Nokogiri::XML::Builder.new do
         item do
           title x.css('a.epinfo').first.text
           posts = x.css('.forum_thread_post')[2].css('a')
-          next if posts.nil?
+          next if posts.nil? || posts.empty?
           href = (posts[2] || posts[1] || posts[0])[:href]
           link href
           guid href, permalink: true
