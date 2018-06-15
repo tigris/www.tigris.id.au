@@ -6,7 +6,7 @@ require 'digest/md5'
 require 'open-uri/cached'
 require 'time'
 
-url = 'https://eztv.ag/'
+url = 'https://eztv.tf/'
 OpenURI::Cache.invalidate(url, Time.now - 300)
 
 md5  = Digest::MD5.hexdigest(url.to_s)
