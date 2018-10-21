@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'bundler/setup'
+require 'openssl'
 require 'nokogiri'
 require 'digest/md5'
 require 'open-uri/cached'
@@ -16,16 +17,18 @@ path = "public/rss/#{md5}.rss"
 builder = Nokogiri::XML::Builder.new do
   rss(version: '2.0') do
     channel do
-      Nokogiri::HTML(open(url, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)).css('tr.forum_header_border').each do |x|
-        item do
-          title x.css('a.epinfo').first.text
-          posts = x.css('.forum_thread_post')[2].css('a')
-          next if posts.nil? || posts.empty?
-          href = (posts[2] || posts[1] || posts[0])[:href]
-          link href
-          guid href, permalink: true
-          description x.css('a.epinfo').first[:title]
-          category 'TV'
+      ['', 'page_1', 'page_2'].each do |page|
+        Nokogiri::HTML(open("#{url}#{page}", ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)).css('tr.forum_header_border').each do |x|
+          item do
+            title x.css('a.epinfo').first.text
+            posts = x.css('.forum_thread_post')[2].css('a')
+            next if posts.nil? || posts.empty?
+            href = (posts[2] || posts[1] || posts[0])[:href]
+            link href
+            guid href, permalink: true
+            description x.css('a.epinfo').first[:title]
+            category 'TV'
+          end
         end
       end
     end
