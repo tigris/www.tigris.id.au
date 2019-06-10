@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -eu -o pipefail
+
+docker build -t 635087779062.dkr.ecr.ap-southeast-2.amazonaws.com/www.tigris.id.au:latest .
+docker push 635087779062.dkr.ecr.ap-southeast-2.amazonaws.com/www.tigris.id.au:latest
+
+docker build -t 635087779062.dkr.ecr.ap-southeast-2.amazonaws.com/www.tigris.id.au:rss -f Dockerfile.rss .
+docker push 635087779062.dkr.ecr.ap-southeast-2.amazonaws.com/www.tigris.id.au:rss
+
+exit 0
