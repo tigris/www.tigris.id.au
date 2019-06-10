@@ -1,24 +1,22 @@
 #!/usr/bin/env ruby
 
-require 'bundler/setup'
-require 'openssl'
-require 'nokogiri'
+require 'aws-sdk-s3'
 require 'digest/md5'
-require 'open-uri/cached'
+require 'nokogiri'
+require 'openssl'
+require 'rest-client'
 require 'time'
 
 url = 'https://eztv.tf/'
-OpenURI::Cache.invalidate(url, Time.now - 300)
-
-md5  = Digest::MD5.hexdigest(url.to_s)
+md5  = Digest::MD5.hexdigest(url)
 tmp  = "/tmp/#{md5}"
-path = "public/rss/#{md5}.rss"
 
 builder = Nokogiri::XML::Builder.new do
   rss(version: '2.0') do
     channel do
       ['', 'page_1', 'page_2'].each do |page|
-        Nokogiri::HTML(open("#{url}#{page}", ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)).css('tr.forum_header_border').each do |x|
+        response = RestClient::Resource.new(url, verify_ssl: OpenSSL::SSL::VERIFY_NONE).get
+        Nokogiri::HTML(response.body).css('tr.forum_header_border').each do |x|
           item do
             title x.css('a.epinfo').first.text
             posts = x.css('.forum_thread_post')[2].css('a')
@@ -35,5 +33,9 @@ builder = Nokogiri::XML::Builder.new do
   end
 end
 
-File.open(tmp, 'w'){|f| f.puts builder.to_xml }
-system(%Q{mv #{tmp} #{path}})
+s3 = Aws::S3::Client.new(region: 'ap-southeast-2')
+s3.put_object(
+  body: builder.to_xml,
+  bucket: 'www.tigris.id.au',
+  key: "rss/#{md5}.rss"
+)
