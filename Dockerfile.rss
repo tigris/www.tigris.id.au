@@ -1,4 +1,4 @@
-FROM ruby:2.6-alpine@sha256:dfa9ec3eac436e243b371c0f2e5cc6dba4b65a72b130d1a12e6e216661eb2bc3
+FROM ruby:2.6-alpine@sha256:f3eeb2b71ae7c004ca57ddb12618fde07dece33e6a0f0a50b53f03b83be76174
 
 RUN apk add --update \
     build-base \
