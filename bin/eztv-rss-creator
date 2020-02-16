@@ -7,7 +7,7 @@ require 'openssl'
 require 'rest-client'
 require 'time'
 
-url = 'https://eztv.tf/'
+url = 'https://eztv.io/'
 md5  = Digest::MD5.hexdigest(url)
 tmp  = "/tmp/#{md5}"
 
