@@ -37,5 +37,8 @@ s3 = Aws::S3::Client.new(region: 'ap-southeast-2')
 s3.put_object(
   body: builder.to_xml,
   bucket: 'www.tigris.id.au',
-  key: "rss/#{md5}.rss"
+  key: "rss/#{md5}.rss",
+  metadata: {
+    'Expires' => (Time.now + (15 * 60)).utc.strftime('%Y-%m-%dT%H:%M:%SZ')
+  }
 )
