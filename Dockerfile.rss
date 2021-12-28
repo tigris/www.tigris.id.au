@@ -11,9 +11,10 @@ WORKDIR /work
 
 COPY Gemfile /work/Gemfile
 COPY Gemfile.lock /work/Gemfile.lock
-COPY bin/eztv-rss-creator /work/run
-RUN chmod +x /work/run
 
 RUN bundle install --without development
+
+COPY bin/eztv-rss-creator /work/run
+RUN chmod +x /work/run
 
 CMD [ "/work/run" ]
